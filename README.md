@@ -1,10 +1,11 @@
 # Z2M Lichtlabor Gradient Card
 
-Lovelace-Karten (Deutsch) für Zigbee2MQTT-Gradient-Lampen (Hue Festavia, Flux, Lightstrip …) und Z2M-Gruppenszenen:
+Lovelace-Karten (Deutsch) für eine Zigbee2MQTT-Lampengruppe mit Gradient-Lampe (Hue Festavia) und Z2M-Gruppenszenen:
 
-- `custom:gradient-editor-card` – Reiter **Stimmung** (Farbstimmung für eine ganze Lampengruppe würfeln, Szene laden/überschreiben),
-  **Festavia-Verlauf** (Verlauf-Editor), **Verläufe** (gespeicherte Verläufe in `input_text`-Slots), **Szenen-Zuordnung**
-  (was die Gradient-Lampe bei welcher Z2M-Szene tut).
+- `custom:gradient-editor-card` – **Lichtlabor 2.0**: Szenen als Farbkacheln (antippen = einschalten und bearbeiten),
+  Rezepte (Gemütlich, Bunt, Nacht, Frei) mit Würfeln und Farbanzahl, Lampenkacheln inklusive Festavia, Effekte
+  (Hue-Lampeneffekte und langsame Skript-Effekte), Speichern als neue Szene oder Überschreiben, „Licht wie vorher“.
+  Verläufe und Zuordnungen schreibt die Karte beim Speichern selbst in `input_text`-Helfer.
 - `custom:scene-grid-card` – alle Z2M-Szenen einer Gruppe als Tasten, aktive Szene hervorgehoben, optional mit Farbvorschau.
 
 Persönliches Projekt, auf eine bestimmte Home-Assistant-Installation zugeschnitten (Helfer, Skripte und Entity-IDs
