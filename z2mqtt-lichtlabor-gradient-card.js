@@ -25,7 +25,7 @@
  *   cozy_off: [light.x]                   # bleibt beim Rezept „Gemütlich“ aus (z. B. Deckenlampe)
  */
 
-const GE_VERSION = "2.0.0";
+const GE_VERSION = "2.0.1";
 const GE_HEX = /^#[0-9a-fA-F]{6}$/;
 const GE_MAX_FEST = 5;
 const GE_STOP_FX = "stop_hue_effect";
@@ -796,6 +796,7 @@ class GradientEditorCard extends HTMLElement {
         this._ed.st = this._readLight(prev, scene);
         this._ed.fx = this._sceneInfo(scene.id).fx;
         this._profiles[scene.name] = this._readLevels();
+        this._ed.briFrom = scene.name;
         this._lit = scene.name;
         this._fxSent = this._ed.fx;
         this._saveStore();
@@ -893,6 +894,7 @@ class GradientEditorCard extends HTMLElement {
     const whites = (on, kLo, kHi, bLo, bHi) => white.forEach((l) => set(l, { on: on(l), ct: true, k: this._clampK(l, Math.round(geRnd(kLo, kHi) / 50) * 50), b: geRndI(bLo, bHi) }));
     const fest = (cols, style, b) => grads.forEach((l) => set(l, { on: true, white: false, c: cols.slice(0, GE_MAX_FEST), style, b }));
     const cozyOff = this._config.cozy_off || [];
+    const vorher = ed.briFrom ? geClone(st) : null; // Helligkeiten wie Szene: Würfeln ändert nur die Farben
     if (id === "gemuetlich") {
       const base = geRnd(10, 40);
       const pal = Array.from({ length: n }, (_, i) => (base + (i - (n - 1) / 2) * 14 + 360) % 360);
@@ -930,6 +932,7 @@ class GradientEditorCard extends HTMLElement {
       whites(() => Math.random() < 0.5, 2000, 6500, 60, 254);
       fest(pal.map((x) => geHsvHex(x, geRndI(60, 100))), gePick(["linear", "scattered", "mirrored"]), geRndI(60, 200));
     }
+    if (vorher) for (const l of lamps) Object.assign(st[l.key], { on: vorher[l.key].on, b: vorher[l.key].b });
   }
 
   async _roll() {
@@ -1330,8 +1333,19 @@ class GradientEditorCard extends HTMLElement {
     });
     const briSel = h(
       "select",
-      { class: "txt", "aria-label": "Helligkeiten einer Szene übernehmen", onchange: () => { const sc = scenes.find((x) => String(x.id) === briSel.value); if (sc) this._briFrom(sc); } },
-      h("option", { value: "" }, "– wählen –"),
+      {
+        class: "txt", "aria-label": "Helligkeiten einer Szene übernehmen",
+        onchange: () => {
+          const sc = scenes.find((x) => String(x.id) === briSel.value);
+          if (sc) this._briFrom(sc);
+          else {
+            ed.briFrom = "";
+            this._render();
+            this._toast("Würfeln setzt jetzt auch Helligkeit und an/aus nach Rezept");
+          }
+        },
+      },
+      h("option", { value: "", selected: !ed.briFrom }, "– Rezept entscheidet –"),
       scenes.map((x) => h("option", { value: String(x.id), selected: x.name === ed.briFrom }, x.name + (this._profiles[x.name] ? "" : " (schaltet kurz um)")))
     );
     const fxChip = (m) =>
@@ -1388,7 +1402,7 @@ class GradientEditorCard extends HTMLElement {
         h("div", { class: "lbl" }, "Helligkeit"),
         h("div", { class: "range" }, h("span", { class: "l" }, "Alle Lampen"), master, masterVal),
         h("div", { class: "row" }, h("span", { class: "muted" }, "Helligkeiten wie Szene"), briSel),
-        h("div", { class: "muted small" }, "Übernimmt pro Lampe Helligkeit und an/aus aus der Szene, die Farben bleiben.")
+        h("div", { class: "muted small" }, ed.briFrom ? `Helligkeit und an/aus bleiben wie in „${ed.briFrom}“, Würfeln ändert nur die Farben.` : "Übernimmt pro Lampe Helligkeit und an/aus aus der Szene; Würfeln ändert dann nur noch die Farben.")
       ),
       h(
         "div",
